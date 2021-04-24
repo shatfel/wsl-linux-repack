@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+
+## vars
+local _fsFile="${1::=NULL}"
+local _tmpPath="${2::=/tmp/`basename ${0}`.$$$$}"
+local _fsOutFile="${_fsFile}.tar.gz"
+
+[[ ${_fsFile} == "NULL" | ${#} -lt 1 ]] && {
+  printf "/e/ Not enought parameters. See README.md for description \n"
+  exit 2
+  }
+
+
+
+##
+mkdir ${_tmpPath}
+unsquashfs -d ${_tmpPath} ${_fsFile}
+cd ${_tmpPath}
+tar zcvpf ../${_fsOutFile} ./
+
+[[ ${?} != 0 ]] && {
+  printf "/e/ Filesystem does not packed. Some error \n"
+  exit 2
+  }
+
+rm -rf ${_tmpPath}
+
+printf "/i Filesystem created in ${_fsOutFile} ..\nNow you may use wsl --import to import it\n"
+
+local _linName="NewLinux$$$$"
+printf "/i/ For example:\n wsl --import ${_linName} %userprofile%/wls/${_linName} ${_fsOutFile} ..\n"
